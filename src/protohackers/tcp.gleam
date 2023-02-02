@@ -1,3 +1,6 @@
+import gleam/erlang/charlist.{Charlist}
+import gleam/erlang/atom.{Atom}
+
 pub type SocketMode {
   Binary
 }
@@ -41,8 +44,23 @@ pub external fn receive(
 ) -> Result(BitString, Reason) =
   "gen_tcp" "recv"
 
+pub external fn connect(
+  host: Charlist,
+  port: Int,
+  options: List(TcpOption),
+) -> Result(Socket, Reason) =
+  "gen_tcp" "connect"
+
 pub external fn send(socket: Socket, data: BitString) -> Result(Nil, Reason) =
   "tcp_ffi" "send"
 
 pub external fn close(socket: Socket) -> Result(Nil, Reason) =
   "tcp_ffi" "close"
+
+pub external fn do_shutdown(socket: Socket, write: Atom) -> Result(Nil, Reason) =
+  "tcp_ffi" "shutdown"
+
+pub fn shutdown(socket: Socket) -> Result(Nil, Reason) {
+  assert Ok(write) = atom.from_string("write")
+  do_shutdown(socket, write)
+}
